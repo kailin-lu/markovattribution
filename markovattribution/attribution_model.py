@@ -32,15 +32,13 @@ class MarkovAttribution(object):
 
     def _channels(self) -> set:
         """
-
-        :return:
+        Returns a list of unique models
         """
         return set([c for path in self.data[self.path_col] for c in path.split('>')])
 
     def _unique_states(self) -> Dict[str, int]:
         """
-
-        :return:
+        Returns a list of unique states
         """
         states = {
             'NULL': 0,
@@ -52,6 +50,9 @@ class MarkovAttribution(object):
         return states
 
     def _sequences_simple(self, paths: pd.Series, conversions: pd.Series):
+        """
+        Sequence generator for simple model splits
+        """
         for path, conv in zip(paths, conversions):
             path = path.split('>')
             path.insert(0, 'START')
@@ -62,6 +63,9 @@ class MarkovAttribution(object):
             yield path
 
     def _sequences_forward(self, paths, conversions):
+        """
+        Sequence generator for forward model splits
+        """
         for path, conv in zip(paths, conversions):
             path = path.split('>')
             path = [p + 'f_{i}' if i < self.idxmax else p + f'_>{self.idxmax}'
@@ -75,6 +79,7 @@ class MarkovAttribution(object):
 
     def _sequences(self, split_train_test: bool = False, test_size: int = 0.2) -> Any:
         """
+        Return sequence generator
         """
         if split_train_test:
             train_seq, test_seq, train_conv, test_conv = train_test_split(
@@ -100,9 +105,7 @@ class MarkovAttribution(object):
 
     def _update_transition_matrix(self, seq):
         """
-
-        :param seq:
-        :return:
+        Update transition matrix with one sequence
         """
         first_step = self._merge(seq[1:self.order + 1])
         self.transition_matrix[self.states['START'], self.states[first_step]] += 1
@@ -119,9 +122,7 @@ class MarkovAttribution(object):
 
     def _build_transition_matrix(self, sequences):
         """
-
-        :param sequences:
-        :return:
+        Build transition matrix
         """
         n_states = len(self.states)
         print(f'Fitting {n_states} x {n_states} transition matrix')
@@ -135,9 +136,7 @@ class MarkovAttribution(object):
 
     def conversion_rate(self, tm=None) -> float:
         """
-
-        :param tm:
-        :return:
+        Calculate long run conversion probability
         """
         if not self.fitted:
             self.fit()
@@ -154,9 +153,7 @@ class MarkovAttribution(object):
 
     def removal_effect_channel(self, channel: str) -> float:
         """
-
-        :param channel:
-        :return:
+        Calculate removal effect of specified channel
         """
         assert channel in self.channels, 'channel not present in data'
 
@@ -175,8 +172,7 @@ class MarkovAttribution(object):
 
     def all_removal_effects(self):
         """
-
-        :return:
+        Calculate removal effect of all channels
         """
         for channel in self.channels:
             if channel in self.removal_effects:
@@ -188,9 +184,7 @@ class MarkovAttribution(object):
 
     def fit(self, split_train_test: bool = False):
         """
-
-        :param split_train_test:
-        :return:
+        Build transition matrix
         """
         sequences = self._sequences(split_train_test)
         if split_train_test:
