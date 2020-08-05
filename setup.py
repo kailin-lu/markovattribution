@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='markovattribution',
-    version='0.0.1',
+    version='0.0.3',
     author='Kailin L',
     description='Fit a Markov attribution model',
     url='https://github.com/kailin-lu/markovattribution.git',
@@ -11,7 +11,7 @@ setuptools.setup(
         'scipy',
         'pandas',
         'numpy',
-        'sklearn'
+        'scikit-learn'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
